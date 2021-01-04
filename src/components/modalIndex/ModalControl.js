@@ -19,17 +19,37 @@ const getAllModalList = mapObj => {
   return currentList
 }
 
+const getModalItemByApiFlag = (apiFlag, mapObj) => {
+  let mapItem = null
+  // 首先查找 modalList
+  const isExist = (mapObj.modalList || []).some(item => {
+    if (item.apiFlag === apiFlag || (Array.isArray(item.apiFlag) && item.apiFlag.includes(apiFlag))) {
+      mapItem = item
+    }
+    return mapItem
+  })
+  // modalList没找到，继续找 children
+  if (!isExist) {
+    Object.values(mapObj.children || []).some(mo => {
+      mapItem = getModalItemByApiFlag(apiFlag, mo)
+      return mapItem
+    })
+  }
+  return mapItem
+}
 class ModalControl {
   constructor (type) {
     this.type = type
-    this.modalFlatMap = {}
-    this.modalList = getAllModalList(modalMap[this.type])
+    this.modalFlatMap = {} // 用于缓存所有已经订阅的弹窗的信息
+    this.modalList = getAllModalList(modalMap[this.type]) // 该页面下所有需要订阅的弹框列表，数组长度就是n值
   }
 
-  add (modalItem, infoObj) {
-    this.modalFlatMap[modalItem.name] = {
-      id: modalItem.id,
+  add (apiFlag, infoObj) {
+    const modalItem = getModalItemByApiFlag(apiFlag, modalMap[this.type])
+    console.log('modalItem', modalItem)
+    this.modalFlatMap[apiFlag] = {
       level: modalItem.level,
+      name: modalItem.name,
       frontShow: modalItem.frontShow,
       backShow: infoObj.backShow,
       handler: infoObj.handler

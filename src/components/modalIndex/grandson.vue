@@ -38,7 +38,7 @@ export default {
       apiName(modalItem).then((res) => {
         console.log("孙组件-接口数据获取成功:", res);
         // 接口的返回值控制弹窗的展示与否，所以加入弹窗管理实例中
-        modalControl.add(modalItem, {
+        modalControl.add("mockC_1", {
           backShow: res.backShow,
           handler: () => {
             console.log("孙组件-弹窗展示：", modalItem);
